@@ -1065,6 +1065,8 @@ CUSTOM_COURSES_EDX = False
 # Settings for course import olx validation
 ENABLE_COURSE_OLX_VALIDATION = False
 
+ENABLE_LMS_MIGRATION = False
+
 # .. toggle_name: AUTOMATIC_AUTH_FOR_TESTING
 # .. toggle_implementation: DjangoSetting
 # .. toggle_default: False

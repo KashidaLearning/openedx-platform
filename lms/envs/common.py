@@ -136,7 +136,6 @@ ENABLE_UNICODE_USERNAME = False
 #  Django's admin site and will be inaccessible to the superuser.
 # .. toggle_tickets: https://github.com/openedx/edx-platform/pull/829
 ENABLE_DJANGO_ADMIN_SITE = True
-ENABLE_LMS_MIGRATION = False
 
 # .. toggle_name: settings.ENABLE_MASQUERADE
 # .. toggle_implementation: DjangoSetting
