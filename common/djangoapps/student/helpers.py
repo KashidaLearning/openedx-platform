@@ -61,6 +61,12 @@ from openedx.core.djangoapps.user_authn.utils import is_safe_login_or_logout_red
 from openedx.core.lib.time_zone_utils import get_time_zone_offset
 from xmodule.data import CertificatesDisplayBehaviors  # lint-amnesty, pylint: disable=wrong-import-order
 
+# Added by Developer
+try:
+    from ambassador.models import Ambassador, Supervisor
+    from ambassador.tasks import send_supervisor_registration_email
+except Exception as e:
+    pass
 # Enumeration of per-course verification statuses
 # we display on the student dashboard.
 VERIFY_STATUS_NEED_TO_VERIFY = "verify_need_to_verify"
@@ -681,14 +687,16 @@ def do_create_account(form, custom_form=None):
         raise PermissionDenied()
 
     errors = {}
+    log.info("Form Error: {}".format(form.errors))
     errors.update(form.errors)
     if custom_form:
+        log.info("custom_form Error: {}".format(custom_form.errors))
         errors.update(custom_form.errors)
 
     if errors:
         raise ValidationError(errors)
-
-    proposed_username = form.cleaned_data["username"]
+    # Updated by Developer
+    proposed_username = form.cleaned_data["email"]
     user = User(
         username=proposed_username,
         email=form.cleaned_data["email"],
@@ -733,21 +741,38 @@ def do_create_account(form, custom_form=None):
 
     profile_fields = [
         "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
-        "year_of_birth"
+        "year_of_birth", "mobile", "marital_status", "center", "education_office_id",
+        "sector", "stage", "school_id", "account_type", "ministry_member", "company_foundation",
+        "institution_age"
     ]
     profile = UserProfile(
         user=user,
         **{key: form.cleaned_data.get(key) for key in profile_fields}
     )
     extended_profile = form.cleaned_extended_profile
+    if profile.account_type == "ambassador":
+        profile.is_ambassador = True
     if extended_profile:
         profile.meta = json.dumps(extended_profile)
+
+    if custom_form:
+        #consider account type is student if user register by invitation link
+        profile.account_type = "student"
     try:
         profile.save()
+        # Added by Developer
+        if profile.account_type == "ambassador":
+            Ambassador.create_or_update(user, uuid.uuid4().hex)
+        elif profile.account_type == "supervisor":
+            Supervisor.objects.get_or_create(supervisor=user)
+            send_supervisor_registration_email.delay(user.id)
     except Exception:
         log.exception(f"UserProfile creation failed for user {user.id}.")
         raise
 
+    if form.cleaned_data.get("subscribe_newsletter") == "true":
+        from lms.djangoapps.newsletter.models import Subscriber
+        Subscriber.create_or_update(user)
     return user, profile, registration
 
 

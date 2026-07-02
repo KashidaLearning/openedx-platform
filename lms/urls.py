@@ -1054,3 +1054,7 @@ urlpatterns += [
 urlpatterns += [
     path('api/notifications/', include('openedx.core.djangoapps.notifications.urls')),
 ]
+
+urlpatterns += [
+    path('^ckeditor/', include('ckeditor_uploader.urls')), # The CKEditor path
+]

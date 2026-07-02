@@ -25,6 +25,7 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.utils.translation import gettext
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -325,17 +326,37 @@ def courses(request):
 
     # Add marketable programs to the context.
     programs_list = get_programs_with_type(request.site, include_hidden=False)
+    # Added by Developer
+    language_code = get_language()
+    course_ids = [course.id for course in courses_list]
+    courses = CourseOverview.objects.filter(id__in=course_ids, coursemanage__course_type__in=["linear", "non-linear"])
+    workshops = CourseOverview.objects.filter(id__in=course_ids, coursemanage__course_type="workshop")
+    active_courses = []
+    active_workshops = []
+    for course in courses:
+        try:
+            course_details = CourseDetails.fetch(course.id)
+            if language_code == course_details.language:
+                active_courses.append(course)
+        except Exception as e:
+            continue
 
+    for workshop in workshops:
+        try:
+            course_details = CourseDetails.fetch(workshop.id)
+            if language_code == course_details.language:
+                active_workshops.append(workshop)
+        except Exception as e:
+            continue
     return render_to_response(
         "courseware/courses.html",
         {
-            'courses': courses_list,
+            'courses': active_courses,
             'course_discovery_meanings': course_discovery_meanings,
-            'set_default_filter': set_default_filter,
             'programs_list': programs_list,
+            'workshops': active_workshops
         }
     )
-
 
 class PerUserVideoMetadataThrottle(UserRateThrottle):
     """

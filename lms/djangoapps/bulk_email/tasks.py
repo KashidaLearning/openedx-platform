@@ -514,6 +514,8 @@ def _send_course_email(entry_id, email_id, to_list, global_email_context, subtas
         # use the email from address in the CourseEmail, if it is present, otherwise compute it.
         from_addr = course_email.from_addr or _get_source_address(course_email.course_id, course_title, course_language)
 
+    # Added by Developer
+    from_addr = settings.DEFAULT_FROM_EMAIL
     site = Site.objects.get_current()
     try:
         connection = get_connection()

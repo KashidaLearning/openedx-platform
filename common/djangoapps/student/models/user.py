@@ -63,6 +63,17 @@ from .course_enrollment import (
     ManualEnrollmentAudit,
     segment
 )
+from extra_info.models import Schools, EducationOffice
+from extra_info.utils import (
+    CENTER_CHOICES, 
+    SECTOR_CHOICES, 
+    STAGE_CHOICES, 
+    MARITAL_STATUS_CHOICES, 
+    AMBASSADOR_EDUCATION_LEVEL_CHOICES,
+    ACCOUNT_TYPE_CHOICES,
+    INSTITUTION_AGE,
+    YES_NO_CHOICES
+)
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -559,6 +570,55 @@ class UserProfile(models.Model):
         message="Phone number must start with '+' (optional) followed by digits (0-9) only.",
     )
     phone_number = models.CharField(validators=[phone_regex], blank=True, null=True, max_length=50)
+    # Added by Developer
+    account_type = models.CharField(
+        blank=True, null=True, max_length=32, db_index=True, choices=ACCOUNT_TYPE_CHOICES
+    )
+    marital_status = models.CharField(
+        blank=True, null=True, max_length=6, db_index=True, choices=MARITAL_STATUS_CHOICES
+    )
+    phone_regex = RegexValidator(
+        regex=r'^\+?1?\d{10}$', message='Mobile number must be entered in the format: "9999999999". Up to 10 digits allowed.')
+    mobile = models.CharField(
+        _('Mobile No.'), null=True, blank=True, max_length=20, db_index=True)
+    center = models.CharField(
+        blank=True, null=True, max_length=64, db_index=True, choices=CENTER_CHOICES
+    )
+    school_name = models.CharField(
+        blank=True, null=True, max_length=255, db_index=True
+    ) # Replaced with school ForeignKey field
+    ambassador_edu_level = models.CharField(
+        _('Ambassador Education Level'), blank=True, null=True, max_length=64, db_index=True,
+        choices=AMBASSADOR_EDUCATION_LEVEL_CHOICES
+    ) # Not using
+    education_office = models.ForeignKey(
+        EducationOffice,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    ) #Not using
+    sector = models.CharField(max_length=512, db_index=True, blank=True, null=True, choices=SECTOR_CHOICES)
+    stage = models.CharField(max_length=512, db_index=True, blank=True, null=True, choices=STAGE_CHOICES)
+    school = models.ForeignKey(
+        Schools,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    ministry_member = models.CharField(
+        _('Are you a member of the Ministry of education?'),
+        blank=True, null=True, max_length=32, choices=YES_NO_CHOICES
+    )
+    company_foundation = models.CharField(
+        _('Do you have a company foundation?'),
+        blank=True, null=True, max_length=32, choices=YES_NO_CHOICES
+    )
+    institution_age = models.CharField(
+        _('How old is the institution?'),
+        blank=True, null=True, max_length=32, choices=INSTITUTION_AGE
+    )
+    is_ambassador = models.BooleanField(_("Ambassador"), default=False) #It replaced by account type
+    is_mis_user = models.BooleanField(_("MIS User"), default=False) #It replaced by account type
 
     @property
     def has_profile_image(self):
@@ -587,6 +647,30 @@ class UserProfile(models.Model):
         """ Convenience method that returns the human readable gender. """
         if self.gender:
             return self.__enumerable_to_display(self.GENDER_CHOICES, self.gender)
+
+    @property
+    def marital_status_display(self):
+        """ Convenience method that returns the human readable marital_status. """
+        if self.marital_status:
+            return self.__enumerable_to_display(self.MARITAL_STATUS_CHOICES, self.marital_status)
+
+    @property
+    def center_display(self):
+        """ Convenience method that returns the human readable center. """
+        if self.center:
+            return self.__enumerable_to_display(CENTER_CHOICES, self.center)
+
+    @property
+    def stage_display(self):
+        """ Convenience method that returns the human readable stage. """
+        if self.stage:
+            return self.__enumerable_to_display(STAGE_CHOICES, self.stage)
+
+    @property
+    def account_type_display(self):
+        """ Convenience method that returns the human readable gender. """
+        if self.account_type:
+            return self.__enumerable_to_display(ACCOUNT_TYPE_CHOICES, self.account_type)
 
     def get_meta(self):  # pylint: disable=missing-function-docstring
         js_str = self.meta

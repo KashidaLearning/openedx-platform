@@ -234,6 +234,13 @@ def login_and_registration_form(request, initial_mode="login"):
         } for message in messages.get_messages(request) if 'account-recovery' in message.tags
     ]
 
+    # Added by Developer
+    if initial_mode == "login":
+        seo_title = "تسجيل الدخول"
+        seo_description = "صفحة تسجيل الدخول إلى منصة رواد,رواد هو مبادرة توعوية تأهيلية مقدمة من مجموعة سدكو القابضة لرواد الأعمال"
+    else:
+        seo_title = "إنشاء حساب جديد"
+        seo_description = "صفحة إنشاء حساب جديد على منصة رواد,رواد هو مبادرة توعوية تأهيلية مقدمة من مجموعة سدكو القابضة لرواد الأعمال"
     # Otherwise, render the combined login/registration page
     context = {
         'data': {
@@ -275,6 +282,8 @@ def login_and_registration_form(request, initial_mode="login"):
             'ENABLE_COMBINED_LOGIN_REGISTRATION_FOOTER',
             settings.FEATURES['ENABLE_COMBINED_LOGIN_REGISTRATION_FOOTER']
         ),
+        'seo_title': seo_title,
+        'seo_description': seo_description,
     }
 
     update_logistration_context_for_enterprise(request, context, enterprise_customer)
