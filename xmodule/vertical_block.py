@@ -48,28 +48,28 @@ class VerticalFields:
         scope=Scope.settings,
     )
 
-    unit_image = String(
+    image_for_unit = String(
         display_name=_("Image for this unit"),
         help=_("File path of the image to associate with this Unit."),
         default=None,
         scope=Scope.settings,
     )
 
-    unit_icon_image = String(
+    image_for_unit_icon = String(
         display_name=_("Icon Image for this unit"),
         help=_("File path of the icon image to associate with this Unit."),
         default=None,
         scope=Scope.settings,
     )
 
-    unit_duration = String(
+    duration_for_unit = String(
         display_name=_("Duration for this unit"),
         help=_("Estimated duration to complete this Unit."),
         default=None,
         scope=Scope.settings,
     )
 
-    unit_navbar_icon = String(
+    top_icon_for_unit = String(
         display_name=_("Top Navbar icon for this unit"),
         help=_("File path of the icon to show for this Unit in the top navigation bar."),
         default=None,
