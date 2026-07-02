@@ -959,6 +959,13 @@ class CourseFields:  # lint-amnesty, pylint: disable=missing-class-docstring
         scope=Scope.settings
     )
 
+    session_info = List(
+        display_name=_("Course Session Information"),
+        help=_("Specify list of sessions for the course."),
+        default=[],
+        scope=Scope.settings
+    )
+
     course_visibility = String(
         display_name=_("Course Visibility For Unenrolled Learners"),
         help=_(
