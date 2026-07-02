@@ -1342,6 +1342,11 @@ def create_xblock_info(  # lint-amnesty, pylint: disable=too-many-statements
         if is_xblock_unit:
             # if xblock is a Unit we add the discussion_enabled option
             xblock_info["discussion_enabled"] = xblock.discussion_enabled
+            # ... and the custom advanced-tab fields (image, icon, duration, navbar icon)
+            xblock_info["unit_image"] = xblock.unit_image
+            xblock_info["unit_icon_image"] = xblock.unit_icon_image
+            xblock_info["unit_duration"] = xblock.unit_duration
+            xblock_info["unit_navbar_icon"] = xblock.unit_navbar_icon
 
         if xblock.category == "sequential":
             # Entrance exam subsection should be hidden. in_entrance_exam is

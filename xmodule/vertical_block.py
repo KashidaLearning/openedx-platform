@@ -14,7 +14,7 @@ from lxml import etree
 from openedx_filters.learning.filters import VerticalBlockChildRenderStarted, VerticalBlockRenderCompleted
 from web_fragments.fragment import Fragment
 from xblock.core import XBlock  # lint-amnesty, pylint: disable=wrong-import-order
-from xblock.fields import Boolean, Scope
+from xblock.fields import Boolean, Scope, String
 
 from xmodule.mako_block import MakoTemplateBlockBase
 from xmodule.progress import Progress
@@ -45,6 +45,34 @@ class VerticalFields:
         display_name=_("Enable in-context discussions for the Unit"),
         help=_("Add discussion for the Unit."),
         default=settings.FEATURES.get('IN_CONTEXT_DISCUSSION_ENABLED_DEFAULT', True),
+        scope=Scope.settings,
+    )
+
+    unit_image = String(
+        display_name=_("Image for this unit"),
+        help=_("File path of the image to associate with this Unit."),
+        default=None,
+        scope=Scope.settings,
+    )
+
+    unit_icon_image = String(
+        display_name=_("Icon Image for this unit"),
+        help=_("File path of the icon image to associate with this Unit."),
+        default=None,
+        scope=Scope.settings,
+    )
+
+    unit_duration = String(
+        display_name=_("Duration for this unit"),
+        help=_("Estimated duration to complete this Unit."),
+        default=None,
+        scope=Scope.settings,
+    )
+
+    unit_navbar_icon = String(
+        display_name=_("Top Navbar icon for this unit"),
+        help=_("File path of the icon to show for this Unit in the top navigation bar."),
+        default=None,
         scope=Scope.settings,
     )
 
