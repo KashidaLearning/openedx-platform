@@ -2,12 +2,17 @@
 Outline Tab Serializers.
 """
 
+import logging
+
 from django.utils.translation import ngettext
 from rest_framework import serializers
 
+from common.djangoapps.static_replace import replace_static_urls
 from lms.djangoapps.course_home_api.dates.serializers import DateSummarySerializer
 from lms.djangoapps.course_home_api.progress.serializers import CertificateDataSerializer
 from lms.djangoapps.course_home_api.serializers import DatesBannerSerializer, VerifiedModeSerializer
+
+log = logging.getLogger(__name__)
 
 
 class CourseBlockSerializer(serializers.Serializer):
@@ -15,6 +20,29 @@ class CourseBlockSerializer(serializers.Serializer):
     Serializer for Course Block Objects
     """
     blocks = serializers.SerializerMethodField()
+
+    def _resolve_unit_asset_url(self, path):
+        """
+        Resolve a unit asset field (e.g. image_for_unit) to a fully-qualified URL.
+
+        Authors may enter a course-relative path such as "/static/foo.png" (the
+        same convention used inside HTML content), an already-canonical asset
+        path, or an absolute URL. `replace_static_urls` is the platform's own
+        mechanism for this exact conversion; non-"/static/" values pass through
+        unchanged. It expects its input wrapped in quotes (matching how it's
+        used elsewhere in the platform, e.g. contentstore/tasks.py), so we wrap
+        and unwrap here.
+        """
+        if not path:
+            return path
+        course_overview = self.context.get('course_overview')
+        if not course_overview:
+            return path
+        try:
+            return replace_static_urls(f'"{path}"', course_id=course_overview.id)[1:-1]
+        except Exception:  # pylint: disable=broad-except
+            log.warning('Could not resolve unit asset url %s for course %s', path, course_overview.id)
+            return path
 
     def get_blocks(self, block):  # pylint: disable=missing-function-docstring
         block_key = block['id']
@@ -62,6 +90,10 @@ class CourseBlockSerializer(serializers.Serializer):
                 'type': block_type,
                 'has_scheduled_content': block.get('has_scheduled_content'),
                 'hide_from_toc': block.get('hide_from_toc'),
+                'image_for_unit': self._resolve_unit_asset_url(block.get('image_for_unit')),
+                'image_for_unit_icon': self._resolve_unit_asset_url(block.get('image_for_unit_icon')),
+                'duration_for_unit': block.get('duration_for_unit'),
+                'top_icon_for_unit': self._resolve_unit_asset_url(block.get('top_icon_for_unit')),
             },
         }
         if 'special_exam_info' in self.context.get('extra_fields', []) and block.get('special_exam_info'):
@@ -160,6 +192,7 @@ class OutlineTabSerializer(DatesBannerSerializer, VerifiedModeSerializer):
     cert_data = CertificateDataSerializer()
     course_blocks = CourseBlockSerializer()
     course_goals = CourseGoalsSerializer()
+    course_type = serializers.CharField(allow_null=True, required=False)
     course_tools = CourseToolSerializer(many=True)
     dates_widget = DatesWidgetSerializer()
     enroll_alert = EnrollAlertSerializer()

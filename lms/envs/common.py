@@ -722,7 +722,12 @@ ENABLE_REQUIRE_THIRD_PARTY_AUTH = False
 # Specifies extra XBlock fields that should available when requested via the Course Blocks API
 # Should be a list of tuples of (block_type, field_name), where block_type can also be "*" for all block types.
 # e.g. COURSE_BLOCKS_API_EXTRA_FIELDS = [  ('course', 'other_course_settings'), ("problem", "weight")  ]
-COURSE_BLOCKS_API_EXTRA_FIELDS = []
+COURSE_BLOCKS_API_EXTRA_FIELDS = [
+    ('vertical', 'image_for_unit'),
+    ('vertical', 'image_for_unit_icon'),
+    ('vertical', 'duration_for_unit'),
+    ('vertical', 'top_icon_for_unit'),
+]
 
 # Used for A/B testing
 DEFAULT_GROUPS = []

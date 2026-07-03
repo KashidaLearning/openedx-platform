@@ -204,6 +204,21 @@ class OutlineTabView(RetrieveAPIView):
         user_is_masquerading = is_masquerading(request.user, course_key, course_masquerade=masquerade_object)
 
         course_overview = get_course_overview_or_404(course_key)
+
+        # Look up the course's configured type (Linear / Non-Linear / etc.) so the
+        # frontend can decide how to render the outline. This is deliberately
+        # defensive: the outline page is loaded by every enrolled learner on every
+        # course, so a missing/broken plugin app must never break it.
+        course_manage_type = None
+        try:
+            from extra_info.models import CourseManage  # pylint: disable=import-outside-toplevel,import-error
+            course_manage_entry = CourseManage.objects.filter(course_id=course_key).first()
+            if course_manage_entry:
+                course_manage_type = course_manage_entry.course_type
+        except Exception:  # pylint: disable=broad-except
+            course_manage_type = None
+        show_course_units = course_manage_type in ('linear', 'non-linear')
+
         enrollment = CourseEnrollment.get_enrollment(request.user, course_key)
         enrollment_mode = getattr(enrollment, 'mode', None)
         allow_anonymous = COURSE_ENABLE_UNENROLLED_ACCESS_FLAG.is_enabled(course_key)
@@ -351,6 +366,7 @@ class OutlineTabView(RetrieveAPIView):
             'course_blocks': course_blocks,
             'course_goals': course_goals,
             'course_tools': course_tools,
+            'course_type': course_manage_type,
             'dates_widget': dates_widget,
             'enable_proctored_exams': enable_proctored_exams,
             'enroll_alert': enroll_alert,
@@ -366,6 +382,7 @@ class OutlineTabView(RetrieveAPIView):
         context['course_overview'] = course_overview
         context['enable_links'] = show_enrolled or allow_public
         context['enrollment'] = enrollment
+        context['include_vertical'] = show_course_units
         serializer = self.get_serializer_class()(data, context=context)
 
         if send_course_progress_analytics_for_student_is_enabled(course_key) and not user_is_masquerading:

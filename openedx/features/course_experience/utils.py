@@ -117,6 +117,10 @@ def get_course_outline_block_tree(request, course_id, user=None, allow_start_dat
             'resume_block',
             'hide_from_toc',
             'icon_class',
+            'image_for_unit',
+            'image_for_unit_icon',
+            'duration_for_unit',
+            'top_icon_for_unit',
         ],
         allow_start_dates_in_future=allow_start_dates_in_future,
     )
