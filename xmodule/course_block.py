@@ -548,6 +548,7 @@ class CourseFields:  # lint-amnesty, pylint: disable=missing-class-docstring
     advanced_modules = List(
         display_name=_("Advanced Module List"),
         help=_("Enter the names of the advanced modules to use in your course."),
+        default=["pdf", "scorem", "image-explorer","invideoquiz","recommender","feedback","crowdsourcehinter","problem-builder","audio","annotatable","flow-control","freetextresponse","firepad","chartsxblock","scormxblock","edx_sga"],
         scope=Scope.settings
     )
     has_children = True
