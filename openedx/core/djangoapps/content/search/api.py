@@ -275,7 +275,7 @@ def _recurse_children(block, fn, status_cb: Callable[[str], None] | None = None)
     The main purpose of this is just to wrap the loading of each child in
     try...except. Otherwise block.get_children() would do what we need.
     """
-    if block.has_children:
+    if block and block.has_children:
         for child_id in block.children:
             try:
                 child = block.get_child(child_id)
