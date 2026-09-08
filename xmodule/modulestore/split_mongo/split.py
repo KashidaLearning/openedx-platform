@@ -709,6 +709,11 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
 
         self.db_connection._drop_database(database, collections, connections)  # pylint: disable=protected-access
 
+    # added by Developer
+    NEVER_MERGE_FROM_DEFINITION = {
+        'vertical': {'image_for_unit', 'image_for_unit_icon', 'duration_for_unit', 'top_icon_for_unit'},
+    }
+
     def cache_items(self, system, base_block_ids, course_key, depth=0, lazy=True):
         """
         Handles caching of items once inheritance and any other one time
@@ -750,7 +755,16 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
                     if block.definition in definitions:
                         definition = definitions[block.definition]
                         # convert_fields gets done later in the runtime's xblock_from_json
-                        block.fields.update(definition.get('fields'))
+                        # added by Developer
+                        definition_fields = definition.get('fields') or {}
+                        protected_fields = self.NEVER_MERGE_FROM_DEFINITION.get(block.block_type)
+                        if protected_fields:
+                            definition_fields = {
+                                field_name: value
+                                for field_name, value in definition_fields.items()
+                                if not (field_name in protected_fields and field_name in block.fields)
+                            }
+                        block.fields.update(definition_fields)
                         block.definition_loaded = True
 
             system.module_data.update(new_block_data)
